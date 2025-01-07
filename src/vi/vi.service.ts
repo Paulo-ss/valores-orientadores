@@ -78,12 +78,24 @@ export class ViService {
         for (const key in rawJsonData) {
           const data = rawJsonData[key] as any;
 
+          const cetesbFile = this.commonService.readFile<VI>(
+            `${process.cwd()}/files/json/cetesb/cas-cetesb.json`,
+          );
+
+          const foundCetesbCas = cetesbFile[data.__EMPTY_13];
+
           casViNumbers = {
             ...casViNumbers,
             [data.__EMPTY_13]: {
               residentSoil: data.__EMPTY_14,
               industrialSoil: data.__EMPTY_16,
               tapWater: data.__EMPTY_22,
+              VRQ: foundCetesbCas?.VRQ,
+              VP: foundCetesbCas?.VP,
+              agricola: foundCetesbCas?.agricola,
+              residencial: foundCetesbCas?.residencial,
+              industrial: foundCetesbCas?.industrial,
+              VI: foundCetesbCas?.VI,
             },
           };
         }
