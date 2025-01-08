@@ -17,7 +17,7 @@ export class ViService {
   private getCurrentCasViJSONFile() {
     try {
       const currentCasViJSONFile = this.commonService.readFile<IVIFile>(
-        `${process.cwd()}/files/json/cas-vi-numbers.json`,
+        `${process.cwd()}/src/files/json/cas-vi-numbers.json`,
       );
 
       return currentCasViJSONFile;
@@ -79,7 +79,7 @@ export class ViService {
           const data = rawJsonData[key] as any;
 
           const cetesbFile = this.commonService.readFile<VI>(
-            `${process.cwd()}/files/json/cetesb/cas-cetesb.json`,
+            `${process.cwd()}/src/files/json/cetesb/cas-cetesb.json`,
           );
 
           const foundCetesbCas = cetesbFile[data.__EMPTY_13];
@@ -106,7 +106,7 @@ export class ViService {
         };
 
         this.commonService.writeFile(
-          `${process.cwd()}/files/json/cas-vi/cas-vi-numbers.json`,
+          `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
           fileContent,
         );
       }
@@ -121,7 +121,7 @@ export class ViService {
 
   public async findViNumberByCas(cas: string): Promise<VI | null> {
     const casViNumbers = this.commonService.readFile<IVIFile>(
-      `${process.cwd()}/files/json/cas-vi/cas-vi-numbers.json`,
+      `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
     );
 
     let foundCas: IVIContent | null = null;
@@ -144,7 +144,7 @@ export class ViService {
 
   public async findAllAvailableCas() {
     const casViNumbers = this.commonService.readFile<IVIFile>(
-      `${process.cwd()}/files/json/cas-vi/cas-vi-numbers.json`,
+      `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
     );
 
     const availableCas: string[] = [];
@@ -160,7 +160,7 @@ export class ViService {
 
   public async getLastUpdated() {
     const casViNumbers = this.commonService.readFile<IVIFile>(
-      `${process.cwd()}/files/json/cas-vi/cas-vi-numbers.json`,
+      `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
     );
 
     const date = casViNumbers.lastUpdated.replace('Last updated on ', '');
