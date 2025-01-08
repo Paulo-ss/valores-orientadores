@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Req,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Get, Req, UnauthorizedException } from '@nestjs/common';
 import { ViService } from './vi.service';
 import { Request } from 'express';
 
@@ -13,18 +7,8 @@ export class ViController {
   constructor(private readonly viService: ViService) {}
 
   @Get('cas')
-  public async getAllAvailableCas() {
-    return this.viService.findAllAvailableCas();
-  }
-
-  @Get('last-updated')
-  public async getLastUpdatedDate() {
-    return this.viService.getLastUpdated();
-  }
-
-  @Get('cas/:casId')
-  public async getViNumberByCas(@Param('casId') casId: string) {
-    return this.viService.findViNumberByCas(casId);
+  public async getCurrentCasViJSONFile() {
+    return this.viService.getCurrentCasViJSONFile();
   }
 
   @Get('update-cas-vi-file-job')

@@ -1,42 +1,12 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import puppeteer from 'puppeteer';
 import { VI } from 'src/vi/types/vi.type';
 import * as xlsx from 'xlsx';
 import { IVIFile } from './interfaces/vi-file.interface';
-import { IVIContent } from './interfaces/vi-content.interface';
 import { list, put } from '@vercel/blob';
 
 @Injectable()
 export class ViService {
-  private async getCurrentCasViJSONFile() {
-    try {
-      const { blobs } = await list();
-
-      const casVIBlob = blobs.find((blob) =>
-        blob.downloadUrl.includes('cas-vi-numbers'),
-      );
-
-      if (!casVIBlob) {
-        return null;
-      }
-
-      const response = await fetch(casVIBlob.downloadUrl);
-      if (response.ok) {
-        const casViNumbers = await response.json();
-
-        return casViNumbers as IVIFile;
-      }
-    } catch (error) {
-      console.log('CURRENT CAS VI FILE ERROR: ', { error });
-
-      return null;
-    }
-  }
-
   private async getCurrentCetesbJSONFile(): Promise<VI | null> {
     try {
       const { blobs } = await list();
@@ -56,6 +26,38 @@ export class ViService {
       }
     } catch (error) {
       console.log('CURRENT CAS CETESB FILE ERROR: ', { error });
+
+      return null;
+    }
+  }
+
+  public async getCurrentCasViJSONFile(): Promise<IVIFile | null> {
+    try {
+      const { blobs } = await list();
+
+      const casVIBlob = blobs.find((blob) =>
+        blob.downloadUrl.includes('cas-vi-numbers'),
+      );
+
+      if (!casVIBlob) {
+        return null;
+      }
+
+      const response = await fetch(casVIBlob.downloadUrl);
+      if (response.ok) {
+        const casViNumbers = (await response.json()) as IVIFile;
+
+        const date = casViNumbers.lastUpdated.replace('Last updated on ', '');
+        const formattedDate = new Date(date).toLocaleDateString('pt', {
+          day: '2-digit',
+          month: 'short',
+          year: '2-digit',
+        });
+
+        return { ...casViNumbers, lastUpdated: formattedDate };
+      }
+    } catch (error) {
+      console.log('CURRENT CAS VI FILE ERROR: ', { error });
 
       return null;
     }
@@ -155,53 +157,5 @@ export class ViService {
     } finally {
       await browser.close();
     }
-  }
-
-  public async findViNumberByCas(cas: string): Promise<VI | null> {
-    const casViNumbers = await this.getCurrentCasViJSONFile();
-
-    let foundCas: IVIContent | null = null;
-
-    for (const key in casViNumbers.vi) {
-      if (key === cas) {
-        foundCas = casViNumbers.vi[key];
-        break;
-      }
-    }
-
-    if (foundCas === null) {
-      throw new BadRequestException(
-        `Valores Orientadores não encontrados para o CAS ${cas}`,
-      );
-    }
-
-    return { [cas]: foundCas };
-  }
-
-  public async findAllAvailableCas() {
-    const casViNumbers = await this.getCurrentCasViJSONFile();
-
-    const availableCas: string[] = [];
-
-    for (const key in casViNumbers.vi) {
-      if (key && key !== 'CAS No.') {
-        availableCas.push(key);
-      }
-    }
-
-    return availableCas;
-  }
-
-  public async getLastUpdated() {
-    const casViNumbers = await this.getCurrentCasViJSONFile();
-
-    const date = casViNumbers.lastUpdated.replace('Last updated on ', '');
-    const formattedDate = new Date(date).toLocaleDateString('pt', {
-      day: '2-digit',
-      month: 'short',
-      year: '2-digit',
-    });
-
-    return { lastUpdated: formattedDate };
   }
 }
