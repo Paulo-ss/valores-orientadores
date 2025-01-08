@@ -4,24 +4,59 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import puppeteer from 'puppeteer';
-import { CommonService } from 'src/tasks/common/common.service';
 import { VI } from 'src/vi/types/vi.type';
 import * as xlsx from 'xlsx';
 import { IVIFile } from './interfaces/vi-file.interface';
 import { IVIContent } from './interfaces/vi-content.interface';
+import { list, put } from '@vercel/blob';
 
 @Injectable()
 export class ViService {
-  constructor(private readonly commonService: CommonService) {}
-
-  private getCurrentCasViJSONFile() {
+  private async getCurrentCasViJSONFile() {
     try {
-      const currentCasViJSONFile = this.commonService.readFile<IVIFile>(
-        `${process.cwd()}/src/files/json/cas-vi-numbers.json`,
+      const { blobs } = await list();
+
+      const casVIBlob = blobs.find((blob) =>
+        blob.downloadUrl.includes('cas-vi-numbers'),
       );
 
-      return currentCasViJSONFile;
+      if (!casVIBlob) {
+        return null;
+      }
+
+      const response = await fetch(casVIBlob.downloadUrl);
+      if (response.ok) {
+        const casViNumbers = await response.json();
+
+        return casViNumbers as IVIFile;
+      }
     } catch (error) {
+      console.log('CURRENT CAS VI FILE ERROR: ', { error });
+
+      return null;
+    }
+  }
+
+  private async getCurrentCetesbJSONFile(): Promise<VI | null> {
+    try {
+      const { blobs } = await list();
+
+      const casCetesbBlob = blobs.find((blob) =>
+        blob.downloadUrl.includes('cas-cetesb'),
+      );
+      if (!casCetesbBlob) {
+        return null;
+      }
+
+      const response = await fetch(casCetesbBlob.downloadUrl);
+      if (response.ok) {
+        const casViNumbers = await response.json();
+
+        return casViNumbers as VI;
+      }
+    } catch (error) {
+      console.log('CURRENT CAS CETESB FILE ERROR: ', { error });
+
       return null;
     }
   }
@@ -42,7 +77,7 @@ export class ViService {
         },
       );
 
-      const currentCasViJSONFile = this.getCurrentCasViJSONFile();
+      const currentCasViJSONFile = await this.getCurrentCasViJSONFile();
       if (
         currentCasViJSONFile &&
         lastUpdated === currentCasViJSONFile.lastUpdated
@@ -78,11 +113,11 @@ export class ViService {
         for (const key in rawJsonData) {
           const data = rawJsonData[key] as any;
 
-          const cetesbFile = this.commonService.readFile<VI>(
-            `${process.cwd()}/src/files/json/cetesb/cas-cetesb.json`,
-          );
+          const cetesbFile = await this.getCurrentCetesbJSONFile();
 
-          const foundCetesbCas = cetesbFile[data.__EMPTY_13];
+          const foundCetesbCas = cetesbFile
+            ? cetesbFile[data.__EMPTY_13]
+            : undefined;
 
           casViNumbers = {
             ...casViNumbers,
@@ -105,10 +140,9 @@ export class ViService {
           vi: casViNumbers,
         };
 
-        this.commonService.writeFile(
-          `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
-          fileContent,
-        );
+        await put('cas-cetesb.json', JSON.stringify(fileContent), {
+          access: 'public',
+        });
       }
     } catch (error) {
       console.log('SCRAPE ERROR: ', { error });
@@ -120,9 +154,7 @@ export class ViService {
   }
 
   public async findViNumberByCas(cas: string): Promise<VI | null> {
-    const casViNumbers = this.commonService.readFile<IVIFile>(
-      `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
-    );
+    const casViNumbers = await this.getCurrentCasViJSONFile();
 
     let foundCas: IVIContent | null = null;
 
@@ -143,9 +175,7 @@ export class ViService {
   }
 
   public async findAllAvailableCas() {
-    const casViNumbers = this.commonService.readFile<IVIFile>(
-      `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
-    );
+    const casViNumbers = await this.getCurrentCasViJSONFile();
 
     const availableCas: string[] = [];
 
@@ -159,9 +189,7 @@ export class ViService {
   }
 
   public async getLastUpdated() {
-    const casViNumbers = this.commonService.readFile<IVIFile>(
-      `${process.cwd()}/src/files/json/cas-vi/cas-vi-numbers.json`,
-    );
+    const casViNumbers = await this.getCurrentCasViJSONFile();
 
     const date = casViNumbers.lastUpdated.replace('Last updated on ', '');
     const formattedDate = new Date(date).toLocaleDateString('pt', {
