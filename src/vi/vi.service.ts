@@ -105,8 +105,6 @@ export class ViService {
           vi: casViNumbers,
         };
 
-        this.commonService.emptyDir(`${process.cwd()}/files/json/cas-vi`);
-
         this.commonService.writeFile(
           `${process.cwd()}/files/json/cas-vi/cas-vi-numbers.json`,
           fileContent,
@@ -158,5 +156,20 @@ export class ViService {
     }
 
     return availableCas;
+  }
+
+  public async getLastUpdated() {
+    const casViNumbers = this.commonService.readFile<IVIFile>(
+      `${process.cwd()}/files/json/cas-vi/cas-vi-numbers.json`,
+    );
+
+    const date = casViNumbers.lastUpdated.replace('Last updated on ', '');
+    const formattedDate = new Date(date).toLocaleDateString('pt', {
+      day: '2-digit',
+      month: 'short',
+      year: '2-digit',
+    });
+
+    return { lastUpdated: formattedDate };
   }
 }

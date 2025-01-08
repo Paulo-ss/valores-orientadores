@@ -10,6 +10,11 @@ export class ViController {
     return this.viService.findAllAvailableCas();
   }
 
+  @Get('last-updated')
+  public async getLastUpdatedDate() {
+    return this.viService.getLastUpdated();
+  }
+
   @Get('cas/:casId')
   public async getViNumberByCas(@Param('casId') casId: string) {
     return this.viService.findViNumberByCas(casId);
