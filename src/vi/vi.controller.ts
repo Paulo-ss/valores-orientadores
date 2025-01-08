@@ -1,5 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ViService } from './vi.service';
+import { Request } from 'express';
 
 @Controller('/vi')
 export class ViController {
@@ -18,5 +25,16 @@ export class ViController {
   @Get('cas/:casId')
   public async getViNumberByCas(@Param('casId') casId: string) {
     return this.viService.findViNumberByCas(casId);
+  }
+
+  @Get('update-cas-vi-file-job')
+  public async updateCasViJSONFile(@Req() request: Request) {
+    if (
+      request.headers['Authorization'] !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    return this.viService.generateCasViJSONFile();
   }
 }

@@ -65,6 +65,8 @@ export class ViService {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
+    console.log('COMECOU');
+
     try {
       await page.goto(
         'https://www.epa.gov/risk/regional-screening-levels-rsls-generic-tables',
@@ -110,10 +112,10 @@ export class ViService {
 
         let casViNumbers: VI = {} as VI;
 
+        const cetesbFile = await this.getCurrentCetesbJSONFile();
+
         for (const key in rawJsonData) {
           const data = rawJsonData[key] as any;
-
-          const cetesbFile = await this.getCurrentCetesbJSONFile();
 
           const foundCetesbCas = cetesbFile
             ? cetesbFile[data.__EMPTY_13]
@@ -140,9 +142,11 @@ export class ViService {
           vi: casViNumbers,
         };
 
-        await put('cas-cetesb.json', JSON.stringify(fileContent), {
+        await put('cas-vi-numbers.json', JSON.stringify(fileContent), {
           access: 'public',
         });
+
+        console.log('AQUI');
       }
     } catch (error) {
       console.log('SCRAPE ERROR: ', { error });
