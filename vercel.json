@@ -16,7 +16,11 @@
   "crons": [
     {
       "path": "/vi/update-cas-vi-file-job",
-      "schedule": "0 2 * 5/9 *"
+      "schedule": "0 2 * 5 *"
+    },
+    {
+      "path": "/vi/update-cas-vi-file-job",
+      "schedule": "0 2 * 9 *"
     }
   ]
 }
