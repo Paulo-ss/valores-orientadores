@@ -21,4 +21,19 @@ export class ViController {
 
     return this.viService.generateCasViJSONFile();
   }
+
+  @Get('test-cron-job')
+  public async testCronJob(@Req() request: Request) {
+    console.log({ Authorization1: request.headers['Authorization'] });
+
+    if (
+      request.headers['Authorization'] !== `Bearer ${process.env.CRON_SECRET}`
+    ) {
+      throw new UnauthorizedException();
+    }
+
+    console.log({ Authorization2: request.headers['Authorization'] });
+
+    return { ok: true };
+  }
 }

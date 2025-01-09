@@ -20,7 +20,11 @@
     },
     {
       "path": "/vi/update-cas-vi-file-job",
-      "schedule": "0 2 * 9 *"
+      "schedule": "0 2 * 11 *"
+    },
+    {
+      "path": "/vi/test-cron-job",
+      "schedule": "*/1 * * * *"
     }
   ]
 }
