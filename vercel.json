@@ -24,7 +24,7 @@
     },
     {
       "path": "/vi/test-cron-job",
-      "schedule": "*/1 * * * *"
+      "schedule": "0 2 * * *"
     }
   ]
 }
