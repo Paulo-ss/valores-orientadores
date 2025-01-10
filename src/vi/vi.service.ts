@@ -63,12 +63,6 @@ export class ViService {
     }
   }
 
-  public async test() {
-    await put('test.json', JSON.stringify({ ok: 'success' }), {
-      access: 'public',
-    });
-  }
-
   public async generateCasViJSONFile() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
