@@ -63,11 +63,15 @@ export class ViService {
     }
   }
 
+  public async test() {
+    await put('cas-vi-numbers.json', JSON.stringify({ ok: 'success' }), {
+      access: 'public',
+    });
+  }
+
   public async generateCasViJSONFile() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-
-    console.log('COMECOU');
 
     try {
       await page.goto(
@@ -147,8 +151,6 @@ export class ViService {
         await put('cas-vi-numbers.json', JSON.stringify(fileContent), {
           access: 'public',
         });
-
-        console.log('AQUI');
       }
     } catch (error) {
       console.log('SCRAPE ERROR: ', { error });
