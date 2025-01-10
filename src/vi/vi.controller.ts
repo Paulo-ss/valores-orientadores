@@ -24,9 +24,7 @@ export class ViController {
 
   @Get('test-cron-job')
   public async testCronJob(@Req() request: Request) {
-    if (
-      request.headers['Authorization'] !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
+    if (request.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
       throw new UnauthorizedException();
     }
 

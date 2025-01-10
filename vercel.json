@@ -16,7 +16,7 @@
   "crons": [
     {
       "path": "/vi/update-cas-vi-file-job",
-      "schedule": "0 2 * 5,11 *"
+      "schedule": "* 2 * 5,11 *"
     },
     {
       "path": "/vi/test-cron-job",
