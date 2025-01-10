@@ -64,7 +64,7 @@ export class ViService {
   }
 
   public async test() {
-    await put('cas-vi-numbers.json', JSON.stringify({ ok: 'success' }), {
+    await put('test.json', JSON.stringify({ ok: 'success' }), {
       access: 'public',
     });
   }
