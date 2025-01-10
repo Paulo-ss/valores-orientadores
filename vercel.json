@@ -20,7 +20,7 @@
     },
     {
       "path": "/vi/test-cron-job",
-      "schedule": "20 12 * * *"
+      "schedule": "5 13 * * *"
     }
   ]
 }
