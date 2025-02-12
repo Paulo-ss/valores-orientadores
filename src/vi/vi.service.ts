@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer';
 import { VI } from 'src/vi/types/vi.type';
 import * as xlsx from 'xlsx';
 import { IVIFile } from './interfaces/vi-file.interface';
-import { list, put } from '@vercel/blob';
+import { list, put, del } from '@vercel/blob';
 
 @Injectable()
 export class ViService {
@@ -141,6 +141,8 @@ export class ViService {
           lastUpdated,
           vi: casViNumbers,
         };
+
+        await del('cas-vi-numbers.json');
 
         await put('cas-vi-numbers.json', JSON.stringify(fileContent), {
           access: 'public',
