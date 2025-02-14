@@ -137,12 +137,41 @@ export class ViService {
           };
         }
 
+        for (const key in cetesbFile) {
+          const cas = casViNumbers[key];
+
+          if (!cas) {
+            const foundCetesbCas = cetesbFile[key];
+
+            casViNumbers = {
+              ...casViNumbers,
+              [key]: {
+                residentSoil: undefined,
+                industrialSoil: undefined,
+                tapWater: undefined,
+                VRQ: foundCetesbCas?.VRQ,
+                VP: foundCetesbCas?.VP,
+                agricola: foundCetesbCas?.agricola,
+                residencial: foundCetesbCas?.residencial,
+                industrial: foundCetesbCas?.industrial,
+                VI: foundCetesbCas?.VI,
+              },
+            };
+          }
+        }
+
         const fileContent: IVIFile = {
           lastUpdated,
           vi: casViNumbers,
         };
 
-        await del('cas-vi-numbers.json');
+        const { blobs } = await list();
+
+        blobs.forEach(async (blob) => {
+          if (blob.downloadUrl.includes('cas-vi-numbers')) {
+            await del(blob.downloadUrl);
+          }
+        });
 
         await put('cas-vi-numbers.json', JSON.stringify(fileContent), {
           access: 'public',
