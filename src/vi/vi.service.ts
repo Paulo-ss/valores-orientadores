@@ -7,6 +7,21 @@ import { list, put, del } from '@vercel/blob';
 
 @Injectable()
 export class ViService {
+  private getAndFormatDateFromLastUpdatedString(dateString: string): string {
+    if (!dateString) {
+      return null;
+    }
+
+    const date = dateString.replace('Last updated on ', '');
+    const formattedDate = new Date(date).toLocaleDateString('pt', {
+      day: '2-digit',
+      month: 'short',
+      year: '2-digit',
+    });
+
+    return formattedDate;
+  }
+
   private async getCurrentCetesbJSONFile(): Promise<VI | null> {
     try {
       const { blobs } = await list();
@@ -47,12 +62,9 @@ export class ViService {
       if (response.ok) {
         const casViNumbers = (await response.json()) as IVIFile;
 
-        const date = casViNumbers.lastUpdated.replace('Last updated on ', '');
-        const formattedDate = new Date(date).toLocaleDateString('pt', {
-          day: '2-digit',
-          month: 'short',
-          year: '2-digit',
-        });
+        const formattedDate = this.getAndFormatDateFromLastUpdatedString(
+          casViNumbers.lastUpdated,
+        );
 
         return { ...casViNumbers, lastUpdated: formattedDate };
       }
@@ -64,7 +76,7 @@ export class ViService {
   }
 
   public async generateCasViJSONFile() {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     try {
@@ -78,11 +90,13 @@ export class ViService {
           return element.innerHTML;
         },
       );
+      const lastUpdatedFormattedDate =
+        this.getAndFormatDateFromLastUpdatedString(lastUpdated);
 
       const currentCasViJSONFile = await this.getCurrentCasViJSONFile();
       if (
         currentCasViJSONFile &&
-        lastUpdated === currentCasViJSONFile.lastUpdated
+        lastUpdatedFormattedDate === currentCasViJSONFile.lastUpdated
       ) {
         return;
       }
